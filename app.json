@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Native App",
+    "slug": "expo-native-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.exponativeapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta aplicacion utiliza la camara para tomar fotografias.",
+        "NSLocationWhenInUseUsageDescription": "Esta aplicacion utiliza la ubicacion del dispositivo."
+      }
+    },
+    "android": {
+      "package": "com.example.exponativeapp",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite acceder a la camara del dispositivo."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permite acceder a la ubicacion del dispositivo."
+        }
+      ]
+    ]
+  }
+}
