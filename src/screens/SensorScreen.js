@@ -1,116 +1,80 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import useAccelerometer from '../hooks/useAccelerometer';
-import InfoCard from '../components/InfoCard';
-import StatRow from '../components/StatRow';
-import EmptyState from '../components/EmptyState';
 import { colors } from '../theme/colors';
 import { spacing, radius } from '../theme/spacing';
 import { typography } from '../theme/typography';
 
 export default function SensorScreen() {
-  const { reading, active, available, magnitude } = useAccelerometer(200);
+  const { reading, available, magnitude } = useAccelerometer(200);
+  const [isAlert, setIsAlert] = useState(false);
+
+  useEffect(() => {
+    // Si la magnitud supera cierto umbral (movimiento brusco), activa alerta
+    if (magnitude > 2.5 && !isAlert) {
+      setIsAlert(true);
+      setTimeout(() => setIsAlert(false), 3000);
+    }
+  }, [magnitude, isAlert]);
 
   if (!available) {
     return (
       <View style={styles.container}>
-        <EmptyState
-          icon="pulse-outline"
-          title="Acelerometro no disponible"
-          description="El dispositivo no cuenta con este sensor."
-        />
+        <Ionicons name="warning" size={64} color={colors.textMuted} />
+        <Text style={styles.title}>Sensor no disponible</Text>
       </View>
     );
   }
 
-  const normalize = (value) => Math.min(Math.abs(value) / 2, 1);
-
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <InfoCard icon="pulse-outline" title="Acelerometro">
-        <StatRow label="Estado" value={active ? 'Activo' : 'Inactivo'} />
-        <StatRow label="Intervalo" value="200 ms" />
-        <StatRow label="Magnitud total" value={magnitude.toFixed(3)} />
-      </InfoCard>
+    <View style={[styles.container, isAlert && { backgroundColor: '#fde8e8' }]}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Seguridad</Text>
+        <Text style={styles.headerSubtitle}>Monitoreo de movimiento en tiempo real</Text>
+      </View>
 
-      <InfoCard icon="analytics-outline" title="Lecturas por eje">
-        <StatRow label="Eje X" value={reading.x.toFixed(3)} />
-        <StatRow label="Eje Y" value={reading.y.toFixed(3)} />
-        <StatRow label="Eje Z" value={reading.z.toFixed(3)} />
-      </InfoCard>
-
-      <InfoCard icon="stats-chart-outline" title="Intensidad">
-        <View style={styles.barGroup}>
-          <Bar label="X" value={normalize(reading.x)} color={colors.primary} />
-          <Bar label="Y" value={normalize(reading.y)} color={colors.success} />
-          <Bar label="Z" value={normalize(reading.z)} color={colors.warning} />
+      <View style={styles.sensorContainer}>
+        <View style={[styles.circle, isAlert && { borderColor: colors.danger }]}>
+          <Ionicons 
+            name={isAlert ? "alert-circle" : "shield-checkmark"} 
+            size={80} 
+            color={isAlert ? colors.danger : colors.primary} 
+          />
         </View>
-      </InfoCard>
-
-      <InfoCard icon="information-circle-outline" title="Interpretacion">
-        <Text style={styles.note}>
-          Los valores representan la aceleracion del dispositivo sobre cada eje,
-          expresada en unidades de gravedad.
+        <Text style={[styles.statusText, isAlert && { color: colors.danger }]}>
+          {isAlert ? 'ALERTA DE MOVIMIENTO' : 'PROTEGIDO'}
         </Text>
-      </InfoCard>
-    </ScrollView>
-  );
-}
+        <Text style={styles.descText}>
+          {isAlert ? 'Se detectó un movimiento brusco en el dispositivo.' : 'El dispositivo está estable. El acelerómetro monitorea caídas o robos.'}
+        </Text>
+      </View>
 
-function Bar({ label, value, color }) {
-  const width = Math.round(value * 100);
-  return (
-    <View style={styles.barRow}>
-      <Text style={styles.barLabel}>{label}</Text>
-      <View style={styles.barTrack}>
-        <View
-          style={[
-            styles.barFill,
-            { width: width + '%', backgroundColor: color }
-          ]}
-        />
+      <View style={styles.dataCard}>
+        <Text style={styles.dataTitle}>Telemetría del Sensor</Text>
+        <View style={styles.dataRow}>
+          <View style={styles.dataPoint}><Text style={styles.dataLabel}>Eje X</Text><Text style={styles.dataValue}>{reading.x.toFixed(2)}</Text></View>
+          <View style={styles.dataPoint}><Text style={styles.dataLabel}>Eje Y</Text><Text style={styles.dataValue}>{reading.y.toFixed(2)}</Text></View>
+          <View style={styles.dataPoint}><Text style={styles.dataLabel}>Eje Z</Text><Text style={styles.dataValue}>{reading.z.toFixed(2)}</Text></View>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background
-  },
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xxl
-  },
-  note: {
-    ...typography.body,
-    color: colors.textMuted
-  },
-  barGroup: {
-    gap: spacing.sm,
-    paddingVertical: spacing.sm
-  },
-  barRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
-  },
-  barLabel: {
-    ...typography.caption,
-    color: colors.textMuted,
-    width: 18,
-    fontWeight: '600'
-  },
-  barTrack: {
-    flex: 1,
-    height: 10,
-    backgroundColor: colors.background,
-    borderRadius: radius.pill,
-    overflow: 'hidden'
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: radius.pill
-  }
+  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md, paddingTop: spacing.xl },
+  header: { marginBottom: spacing.xl, marginTop: spacing.md },
+  headerTitle: { ...typography.display, color: colors.primaryDark, fontSize: 28 },
+  headerSubtitle: { ...typography.body, color: colors.textMuted },
+  sensorContainer: { alignItems: 'center', marginVertical: spacing.lg },
+  circle: { width: 180, height: 180, borderRadius: 90, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: colors.primarySoft, shadowColor: colors.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 5 },
+  statusText: { ...typography.title, color: colors.primary, marginTop: spacing.lg, letterSpacing: 2 },
+  descText: { ...typography.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, paddingHorizontal: spacing.lg },
+  dataCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, marginTop: spacing.xl },
+  dataTitle: { ...typography.subtitle, color: colors.primaryDark, marginBottom: spacing.md, textAlign: 'center' },
+  dataRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  dataPoint: { alignItems: 'center' },
+  dataLabel: { ...typography.caption, color: colors.textMuted },
+  dataValue: { ...typography.title, color: colors.primary, fontSize: 20 }
 });

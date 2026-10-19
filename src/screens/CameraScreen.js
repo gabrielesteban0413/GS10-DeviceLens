@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import AppButton from '../components/AppButton';
@@ -13,24 +13,15 @@ export default function CameraScreen() {
   const [photo, setPhoto] = useState(null);
   const [facing, setFacing] = useState('back');
 
-  if (!permission) {
-    return <View style={styles.container} />;
-  }
-
+  if (!permission) return <View style={styles.container} />;
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Ionicons name="camera-outline" size={48} color={colors.textMuted} />
-        <Text style={styles.permissionTitle}>Permiso de camara requerido</Text>
-        <Text style={styles.permissionText}>
-          La aplicacion necesita acceso a la camara para tomar fotografias.
-        </Text>
+        <Ionicons name="qr-code-outline" size={64} color={colors.primary} />
+        <Text style={styles.permissionTitle}>Escáner Deshabilitado</Text>
+        <Text style={styles.permissionText}>Concede permisos de cámara para escanear códigos QR de pago.</Text>
         <View style={styles.permissionAction}>
-          <AppButton
-            title="Conceder permiso"
-            icon="lock-open-outline"
-            onPress={requestPermission}
-          />
+          <AppButton title="Activar Cámara" icon="camera" onPress={requestPermission} />
         </View>
       </View>
     );
@@ -42,98 +33,44 @@ export default function CameraScreen() {
     setPhoto(result.uri);
   };
 
-  const toggleFacing = () => {
-    setFacing((current) => (current === 'back' ? 'front' : 'back'));
-  };
-
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <View style={styles.container}>
       <View style={styles.preview}>
         {photo ? (
           <Image source={{ uri: photo }} style={styles.previewImage} />
         ) : (
-          <CameraView ref={cameraRef} style={styles.previewImage} facing={facing} />
+          <CameraView ref={cameraRef} style={styles.previewImage} facing={facing}>
+            <View style={styles.overlay}>
+              <View style={styles.scanBox} />
+            </View>
+          </CameraView>
         )}
       </View>
 
-      <View style={styles.actions}>
-        <AppButton title="Capturar" icon="camera" onPress={takePicture} />
-        <AppButton
-          title="Cambiar camara"
-          icon="camera-reverse-outline"
-          variant="secondary"
-          onPress={toggleFacing}
-        />
-        <AppButton
-          title="Limpiar"
-          icon="trash-outline"
-          variant="ghost"
-          onPress={() => setPhoto(null)}
-          disabled={!photo}
-        />
+      <View style={styles.bottomBar}>
+        {photo ? (
+           <AppButton title="Escanear otro" icon="refresh" onPress={() => setPhoto(null)} />
+        ) : (
+          <>
+            <Text style={styles.instruction}>Apunta al código QR del comercio</Text>
+            <AppButton title="Capturar Código" icon="scan" onPress={takePicture} />
+          </>
+        )}
       </View>
-
-      <Text style={styles.caption}>
-        {photo
-          ? 'Fotografia capturada correctamente.'
-          : 'Enfoca el objetivo y presiona capturar para tomar una fotografia.'}
-      </Text>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background
-  },
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xxl
-  },
-  preview: {
-    width: '100%',
-    aspectRatio: 3 / 4,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    backgroundColor: '#000000',
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border
-  },
-  previewImage: {
-    flex: 1,
-    width: '100%'
-  },
-  actions: {
-    marginBottom: spacing.sm
-  },
-  caption: {
-    ...typography.caption,
-    color: colors.textMuted,
-    textAlign: 'center'
-  },
-  permissionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background
-  },
-  permissionTitle: {
-    ...typography.title,
-    color: colors.text,
-    marginTop: spacing.md,
-    textAlign: 'center'
-  },
-  permissionText: {
-    ...typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: spacing.sm
-  },
-  permissionAction: {
-    width: '100%',
-    marginTop: spacing.lg
-  }
+  container: { flex: 1, backgroundColor: colors.background },
+  preview: { flex: 1, margin: spacing.md, borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#000' },
+  previewImage: { flex: 1, width: '100%' },
+  overlay: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
+  scanBox: { width: 250, height: 250, borderWidth: 2, borderColor: colors.accent, borderRadius: 24, backgroundColor: 'transparent' },
+  bottomBar: { padding: spacing.lg, paddingBottom: spacing.xxl, backgroundColor: colors.background },
+  instruction: { ...typography.body, color: colors.primaryDark, textAlign: 'center', marginBottom: spacing.md, fontWeight: '600' },
+  permissionContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: colors.background },
+  permissionTitle: { ...typography.title, color: colors.primaryDark, marginTop: spacing.md },
+  permissionText: { ...typography.body, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, marginBottom: spacing.lg },
+  permissionAction: { width: '100%' }
 });

@@ -1,20 +1,14 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import HomeStack from './HomeStack';
-import CameraStack from './CameraStack';
-import LocationStack from './LocationStack';
-import SensorStack from './SensorStack';
+import HomeScreen from '../screens/HomeScreen';
+import CameraScreen from '../screens/CameraScreen';
+import LocationScreen from '../screens/LocationScreen';
+import SensorScreen from '../screens/SensorScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
-
-const tabConfig = {
-  HomeTab: { active: 'home', inactive: 'home-outline' },
-  CameraTab: { active: 'camera', inactive: 'camera-outline' },
-  LocationTab: { active: 'location', inactive: 'location-outline' },
-  SensorTab: { active: 'pulse', inactive: 'pulse-outline' }
-};
 
 export default function TabNavigator() {
   return (
@@ -25,25 +19,33 @@ export default function TabNavigator() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          paddingTop: 6,
-          height: 62
+          borderTopWidth: 0,
+          elevation: 15,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -5 },
+          shadowOpacity: 0.05,
+          shadowRadius: 15,
+          height: 75,
+          paddingBottom: 15,
+          paddingTop: 10
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600'
-        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
         tabBarIcon: ({ color, size, focused }) => {
-          const config = tabConfig[route.name];
-          const name = focused ? config.active : config.inactive;
-          return <Ionicons name={name} size={size} color={color} />;
+          let iconName;
+          if (route.name === 'Inicio') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Escanear') iconName = focused ? 'scan' : 'scan-outline';
+          else if (route.name === 'Sucursales') iconName = focused ? 'location' : 'location-outline';
+          else if (route.name === 'Seguridad') iconName = focused ? 'shield-checkmark' : 'shield-checkmark-outline';
+          else if (route.name === 'Perfil') iconName = focused ? 'person' : 'person-outline';
+          return <Ionicons name={iconName} size={24} color={color} />;
         }
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeStack} options={{ title: 'Inicio' }} />
-      <Tab.Screen name="CameraTab" component={CameraStack} options={{ title: 'Camara' }} />
-      <Tab.Screen name="LocationTab" component={LocationStack} options={{ title: 'Ubicacion' }} />
-      <Tab.Screen name="SensorTab" component={SensorStack} options={{ title: 'Sensor' }} />
+      <Tab.Screen name="Inicio" component={HomeScreen} />
+      <Tab.Screen name="Escanear" component={CameraScreen} />
+      <Tab.Screen name="Sucursales" component={LocationScreen} />
+      <Tab.Screen name="Seguridad" component={SensorScreen} />
+      <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

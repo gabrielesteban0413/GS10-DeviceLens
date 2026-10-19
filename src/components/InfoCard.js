@@ -9,46 +9,17 @@ export default function InfoCard({ icon, title, children }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        {icon ? (
-          <View style={styles.iconWrap}>
-            <Ionicons name={icon} size={18} color={colors.primary} />
-          </View>
-        ) : null}
+        {icon && <View style={styles.iconWrap}><Ionicons name={icon} size={20} color={colors.primary} /></View>}
         <Text style={styles.title}>{title}</Text>
       </View>
       <View style={styles.body}>{children}</View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm
-  },
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm
-  },
-  title: {
-    ...typography.subtitle,
-    color: colors.text
-  },
-  body: {
-    gap: spacing.xs
-  }
+  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.md, shadowColor: colors.primaryDark, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 15, elevation: 4 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+  iconWrap: { width: 36, height: 36, borderRadius: radius.md, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm },
+  title: { ...typography.subtitle, color: colors.primary },
+  body: { gap: spacing.xs }
 });
